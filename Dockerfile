@@ -53,9 +53,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     LECTURE_SEARCH_DATA_DIR=/app/data \
     LECTURE_SEARCH_LOGS_DIR=/app/logs \
-    LECTURE_SEARCH_TEMP_DIR=/tmp/lecture-search
+    LECTURE_SEARCH_TEMP_DIR=/tmp/lecture-search \
+    LECTURE_SEARCH_API_PORT=7860
 
 # FFmpeg is required at runtime for audio extraction + ffprobe.
+# HF Spaces default Docker apps to port 7860; we listen there. Local
+# `docker compose` overrides LECTURE_SEARCH_API_PORT back to 8000 in
+# docker-compose.yml so the host workflow stays on the familiar port.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ffmpeg curl \
  && rm -rf /var/lib/apt/lists/* \
@@ -63,16 +67,15 @@ RUN apt-get update \
 
 WORKDIR /app
 COPY --from=builder /install /usr/local
-# Bake the React UI into the image. FastAPI mounts ui/web/ at /app/ so
-# `http://<host>:8000/` lands on the application.
+# Bake the React UI into the image. FastAPI mounts ui/web/ at /app/.
 COPY ui/web /app/ui/web
 RUN mkdir -p /app/data /app/logs /tmp/lecture-search \
  && chown -R app:app /app /tmp/lecture-search
 
 USER app
-EXPOSE 8000
+EXPOSE 7860
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=3 \
-    CMD curl -fsS http://localhost:8000/health || exit 1
+    CMD curl -fsS "http://localhost:${LECTURE_SEARCH_API_PORT:-7860}/health" || exit 1
 
 CMD ["python", "-m", "lecture_search.api.app"]
