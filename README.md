@@ -14,14 +14,6 @@ short_description: Semantic search & RAG over your lecture videos.
 
 > A self-hosted lecture-video search platform — FastAPI + LangGraph ingest, Whisper transcription, Chroma vector retrieval, DSPy-optimized RAG, and a single-process React UI. Bilingual (Arabic + English) by design, provider-neutral for any OpenAI-compatible LLM.
 
-[![Hugging Face Space](https://img.shields.io/badge/HF%20Space-live-yellow.svg)](https://huggingface.co/spaces/OmarGamal48812/lecture-search)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg)](https://fastapi.tiangolo.com/)
-[![LangGraph](https://img.shields.io/badge/LangGraph-StateGraph-1c3c3c.svg)](https://langchain-ai.github.io/langgraph/)
-[![DSPy](https://img.shields.io/badge/DSPy-ChainOfThought-7c3aed.svg)](https://dspy.ai/)
-[![Whisper](https://img.shields.io/badge/Whisper-medium-412991.svg)](https://github.com/openai/whisper)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 ---
 
 ## Live demo
