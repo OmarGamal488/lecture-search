@@ -7,8 +7,9 @@ files — it costs hundreds of MB of RAM and seconds of init time.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 from langchain_chroma import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.documents import Document
@@ -74,7 +75,7 @@ def search_with_scores(
     query: str,
     n_results: int = 5,
     filter_dict: Optional[Dict] = None,
-) -> List[tuple[Document, float]]:
+) -> List[Tuple[Document, float]]:
     """Similarity search returning (document, distance) tuples."""
     try:
         where = (
@@ -87,6 +88,85 @@ def search_with_scores(
         return vectorstore.similarity_search_with_score(query=query, k=n_results)
     except Exception as exc:
         print(f"[ERROR] search_with_scores failed: {exc}")
+        return []
+
+
+def mmr_search_with_scores(
+    query: str,
+    k: int = 5,
+    fetch_k: int = 15,
+    lambda_mult: float = 0.5,
+    filter_dict: Optional[Dict] = None,
+) -> List[Tuple[Document, float]]:
+    """MMR diversification that preserves the underlying distance scores.
+
+    LangChain's MMR retriever returns documents without scores, so we
+    re-implement MMR on top of `similarity_search_with_score`:
+      1. Over-fetch ``fetch_k`` candidates with their distances.
+      2. Embed candidate texts and the query, then run greedy MMR
+         selection on those embeddings (cosine on unit-length vectors).
+      3. Return the chosen documents with their *original* distances so
+         downstream code can convert distance → similarity uniformly.
+    """
+    try:
+        pairs = search_with_scores(query, n_results=fetch_k, filter_dict=filter_dict)
+        if not pairs:
+            return []
+        if len(pairs) <= k:
+            return pairs
+
+        cand_texts = [doc.page_content for doc, _ in pairs]
+        cand_embs = np.asarray(embedding_function.embed_documents(cand_texts))
+        query_emb = np.asarray(embedding_function.embed_query(query))
+
+        selected: List[int] = []
+        remaining = set(range(len(pairs)))
+        while remaining and len(selected) < k:
+            best_i, best_score = -1, -float("inf")
+            for i in remaining:
+                rel = float(np.dot(query_emb, cand_embs[i]))
+                if selected:
+                    div = max(
+                        float(np.dot(cand_embs[i], cand_embs[j]))
+                        for j in selected
+                    )
+                else:
+                    div = 0.0
+                mmr = lambda_mult * rel - (1.0 - lambda_mult) * div
+                if mmr > best_score:
+                    best_score = mmr
+                    best_i = i
+            if best_i < 0:
+                break
+            selected.append(best_i)
+            remaining.discard(best_i)
+        return [pairs[i] for i in selected]
+    except Exception as exc:
+        print(f"[ERROR] mmr_search_with_scores failed: {exc}")
+        return []
+
+
+def threshold_search_with_scores(
+    query: str,
+    similarity_threshold: float = 0.5,
+    k: int = 5,
+    filter_dict: Optional[Dict] = None,
+) -> List[Tuple[Document, float]]:
+    """Score-threshold filter that preserves distance scores.
+
+    ``similarity_threshold`` is expressed in the [0, 1] cosine-similarity
+    space the UI uses. We over-fetch and then keep only candidates whose
+    L2² distance corresponds to a similarity ≥ the threshold. The
+    relationship is ``similarity = 1 - distance/2``, so the equivalent
+    distance ceiling is ``2 * (1 - threshold)``.
+    """
+    try:
+        pairs = search_with_scores(query, n_results=k * 3, filter_dict=filter_dict)
+        max_distance = 2.0 * (1.0 - similarity_threshold)
+        kept = [(d, s) for d, s in pairs if s <= max_distance]
+        return kept[:k]
+    except Exception as exc:
+        print(f"[ERROR] threshold_search_with_scores failed: {exc}")
         return []
 
 
