@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -89,16 +90,37 @@ def create_app() -> FastAPI:
     app.include_router(qa.router)
 
     # Mount the React UI at /app. The bundle is plain HTML + Babel-in-browser
-    # so there's no build step; it lives at <repo>/ui/web.
-    ui_dir = Path(__file__).resolve().parents[3] / "ui" / "web"
-    if ui_dir.exists():
+    # so there's no build step. We probe several candidate locations because
+    # the package may be running:
+    #   - editable-installed at <repo>/src/...     → <repo>/ui/web
+    #   - wheel-installed inside Docker            → /app/ui/web (Dockerfile COPY)
+    #   - or pointed at explicitly via env var
+    ui_dir = _find_ui_dir()
+    if ui_dir is not None:
         app.mount("/app", StaticFiles(directory=str(ui_dir), html=True), name="ui")
-
-        # Redirect bare root to the UI (the existing GET / system endpoint
-        # was registered first, so it still serves the API metadata under
-        # /api-info — see system.py).
+        print(f"[INIT] Serving React UI from {ui_dir} at /app/")
+    else:
+        print("[WARNING] React UI directory not found; /app/ will return 404.")
 
     return app
+
+
+def _find_ui_dir() -> Path | None:
+    """Resolve the React UI directory across editable/Docker/explicit setups."""
+    explicit = os.environ.get("LECTURE_SEARCH_UI_DIR")
+    candidates: list[Path] = []
+    if explicit:
+        candidates.append(Path(explicit))
+    # Editable install: <repo>/src/lecture_search/api/app.py → parents[3] = <repo>
+    candidates.append(Path(__file__).resolve().parents[3] / "ui" / "web")
+    # Docker layout: WORKDIR=/app, COPY ui/web /app/ui/web
+    candidates.append(Path("/app/ui/web"))
+    # CWD-relative fallback (covers running from the repo root).
+    candidates.append(Path.cwd() / "ui" / "web")
+    for path in candidates:
+        if path.exists() and (path / "index.html").exists():
+            return path
+    return None
 
 
 app = create_app()
