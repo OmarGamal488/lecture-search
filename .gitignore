@@ -1,0 +1,54 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+build/
+dist/
+wheels/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+
+# --- IDE / editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# --- Claude Code state & instructions (local only) ---
+.claude/
+CLAUDE.md
+
+# --- Personal tooling, not shipped to GitHub (kept locally) ---
+scripts/deploy_huggingface.py
+scripts/fetch_hf_logs.py
+scripts/generate_eval_set.py
+scripts/compile_prompts.py
+Makefile.local
+
+# --- Project data (heavy / runtime-generated) ---
+data/
+logs/
+
+# --- Secrets / local config ---
+.env
+.env.local
+*.local
+
+# --- Frontend artifacts (none currently, but reserved) ---
+node_modules/
+
+# --- LangChain / Chroma scratch ---
+chroma_db/
+*.sqlite3-journal

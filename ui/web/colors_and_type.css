@@ -1,0 +1,288 @@
+/* ============================================================
+   Lecture Search — Colors & Type
+   ------------------------------------------------------------
+   Light + dark themed CSS variables. Designed to render the
+   same in Streamlit's native chrome and inside React iframes
+   (where it must be imported, since there's no CSS inheritance
+   from the host).
+   ============================================================ */
+
+/* ---------- Light theme (default) ------------------------- */
+:root {
+  /* ---- Foundational palette ---- */
+  --ls-indigo:      #4338ca;   /* accent A — primary brand, search */
+  --ls-magenta:     #c026d3;   /* accent B — mid-gradient, Ask emphasis */
+  --ls-amber-warm:  #f59e0b;   /* accent C — highlighter / scholarship */
+  --ls-blue:        #4338ca;   /* legacy alias → indigo */
+  --ls-purple:      #c026d3;
+  --ls-pink:        #f59e0b;
+  --ls-highlight:   #fde68a;   /* keyword highlighter background */
+  --ls-highlight-ink: #78350f;
+  --ls-amber:       hsl(40, 75%, 48%);    /* low similarity */
+  --ls-emerald:     hsl(150, 70%, 48%);   /* high similarity / success */
+  --ls-red:         #dc2626;   /* error / failed stage */
+
+  /* ---- Neutrals (slate) ---- */
+  --ls-slate-50:    #f8fafc;
+  --ls-slate-100:   #f1f5f9;
+  --ls-slate-200:   #e2e8f0;
+  --ls-slate-300:   #cbd5e1;
+  --ls-slate-400:   #94a3b8;
+  --ls-slate-500:   #64748b;
+  --ls-slate-600:   #475569;
+  --ls-slate-700:   #334155;
+  --ls-slate-800:   #1e293b;
+  --ls-slate-900:   #0f172a;
+
+  /* ---- Semantic surface tokens (light) ---- */
+  --ls-bg:          #ffffff;
+  --ls-bg-elev:     #ffffff;
+  --ls-bg-muted:    var(--ls-slate-50);
+  --ls-bg-sunken:   var(--ls-slate-100);
+
+  --ls-fg:          var(--ls-slate-900);
+  --ls-fg-muted:    var(--ls-slate-600);
+  --ls-fg-subtle:   var(--ls-slate-400);
+  --ls-fg-on-accent: #ffffff;
+
+  --ls-border:      rgba(148, 163, 184, 0.25);
+  --ls-border-strong: rgba(148, 163, 184, 0.45);
+  --ls-divider:     rgba(148, 163, 184, 0.18);
+
+  --ls-accent:      var(--ls-indigo);
+  --ls-accent-soft: rgba(67, 56, 202, 0.10);
+  --ls-accent-ring: rgba(67, 56, 202, 0.35);
+
+  /* ---- Signature gradient (title, KPIs, skeleton sheen) ---- */
+  --ls-gradient-tri:
+    linear-gradient(90deg, #4338ca 0%, #c026d3 50%, #f59e0b 100%);
+  --ls-gradient-tri-soft:
+    linear-gradient(90deg, rgba(67,56,202,0.10) 0%, rgba(192,38,211,0.10) 50%, rgba(245,158,11,0.10) 100%);
+  --ls-gradient-score:
+    linear-gradient(90deg, hsl(40, 75%, 48%) 0%, hsl(150, 70%, 48%) 100%);
+
+  /* ---- Shadows / elevation ---- */
+  --ls-shadow-card:  0 1px 2px rgba(15, 23, 42, 0.04),
+                     0 1px 1px rgba(15, 23, 42, 0.03);
+  --ls-shadow-hover: 0 10px 28px rgba(15, 23, 42, 0.10);
+  --ls-shadow-pop:   0 18px 48px rgba(15, 23, 42, 0.16);
+  --ls-ring-focus:   0 0 0 3px var(--ls-accent-ring);
+
+  /* ---- Radius scale ---- */
+  --ls-radius-xs:   4px;
+  --ls-radius-sm:   8px;
+  --ls-radius-md:   12px;
+  --ls-radius-lg:   14px;   /* card default */
+  --ls-radius-xl:   20px;
+  --ls-radius-pill: 999px;
+
+  /* ---- Spacing (4px base) ---- */
+  --ls-s-0:   0;
+  --ls-s-1:   4px;
+  --ls-s-2:   8px;
+  --ls-s-3:   12px;
+  --ls-s-4:   16px;
+  --ls-s-5:   20px;
+  --ls-s-6:   24px;
+  --ls-s-8:   32px;
+  --ls-s-10:  40px;
+  --ls-s-12:  48px;
+  --ls-s-16:  64px;
+
+  --ls-card-pad: 18px;       /* card default */
+  --ls-card-pad-tight: 16px;
+
+  /* ---- Motion tokens ---- */
+  --ls-dur-fast:   180ms;   /* crossfades, micro */
+  --ls-dur-med:    320ms;   /* card entry */
+  --ls-dur-slow:   650ms;   /* score bar, reveals */
+  --ls-dur-amb:    9000ms;  /* ambient gradient drift */
+
+  --ls-ease-out:   cubic-bezier(0.22, 1, 0.36, 1);    /* entrances */
+  --ls-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ls-ease-emph:  cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Framer Motion spring (documented for parity):
+       { type: "spring", stiffness: 280, damping: 24 } */
+
+  /* ---- Typography ---- */
+  --ls-font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans",
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --ls-font-mono:
+    "JetBrains Mono", "SF Mono", "Menlo", "Consolas",
+    "Liberation Mono", monospace;
+  --ls-font-arabic:
+    "Segoe UI", "Tahoma", "Geeza Pro", "Noto Naskh Arabic",
+    "Arabic Typesetting", sans-serif;
+
+  /* Type scale (1.25 minor third, anchored at 15px body) */
+  --ls-fs-xs:    12px;
+  --ls-fs-sm:    13px;
+  --ls-fs-base:  15px;
+  --ls-fs-md:    17px;
+  --ls-fs-lg:    20px;
+  --ls-fs-xl:    24px;
+  --ls-fs-2xl:   30px;
+  --ls-fs-3xl:   38px;
+  --ls-fs-4xl:   48px;
+
+  --ls-lh-tight:  1.2;
+  --ls-lh-snug:   1.35;
+  --ls-lh-normal: 1.55;
+  --ls-lh-relaxed: 1.7;
+
+  --ls-fw-regular:  400;
+  --ls-fw-medium:   500;
+  --ls-fw-semibold: 600;
+  --ls-fw-bold:     700;
+
+  --ls-tracking-tight:  -0.015em;
+  --ls-tracking-normal: 0;
+  --ls-tracking-wide:   0.04em;
+}
+
+/* ---------- Dark theme ------------------------------------ */
+:root[data-theme="dark"],
+.theme-dark {
+  --ls-bg:          #0b1220;
+  --ls-bg-elev:     #111a2e;
+  --ls-bg-muted:    #0f172a;
+  --ls-bg-sunken:   #07101f;
+
+  --ls-fg:          #e2e8f0;
+  --ls-fg-muted:    #94a3b8;
+  --ls-fg-subtle:   #64748b;
+  --ls-fg-on-accent: #ffffff;
+
+  --ls-border:      rgba(148, 163, 184, 0.22);
+  --ls-border-strong: rgba(148, 163, 184, 0.40);
+  --ls-divider:     rgba(148, 163, 184, 0.14);
+
+  --ls-accent:      #818cf8;
+  --ls-accent-soft: rgba(129, 140, 248, 0.16);
+  --ls-accent-ring: rgba(129, 140, 248, 0.40);
+
+  --ls-shadow-card:  0 1px 2px rgba(0, 0, 0, 0.45),
+                     0 1px 1px rgba(0, 0, 0, 0.35);
+  --ls-shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.45);
+  --ls-shadow-pop:   0 18px 48px rgba(0, 0, 0, 0.55);
+}
+
+/* ---------- Semantic element styles ----------------------- */
+.ls-body {
+  font-family: var(--ls-font-sans);
+  font-size: var(--ls-fs-base);
+  line-height: var(--ls-lh-normal);
+  color: var(--ls-fg);
+  background: var(--ls-bg);
+}
+
+.ls-h1, .ls-display {
+  font-size: var(--ls-fs-3xl);
+  font-weight: var(--ls-fw-bold);
+  line-height: var(--ls-lh-tight);
+  letter-spacing: var(--ls-tracking-tight);
+  background: var(--ls-gradient-tri);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: lsTitleDrift var(--ls-dur-amb) ease-in-out infinite;
+}
+.ls-h2 {
+  font-size: var(--ls-fs-2xl);
+  font-weight: var(--ls-fw-semibold);
+  line-height: var(--ls-lh-tight);
+  letter-spacing: var(--ls-tracking-tight);
+  color: var(--ls-fg);
+}
+.ls-h3 {
+  font-size: var(--ls-fs-xl);
+  font-weight: var(--ls-fw-semibold);
+  line-height: var(--ls-lh-snug);
+  color: var(--ls-fg);
+}
+.ls-h4 {
+  font-size: var(--ls-fs-md);
+  font-weight: var(--ls-fw-semibold);
+  line-height: var(--ls-lh-snug);
+  color: var(--ls-fg);
+}
+.ls-p {
+  font-size: var(--ls-fs-base);
+  line-height: var(--ls-lh-relaxed);
+  color: var(--ls-fg);
+}
+.ls-small, .ls-meta {
+  font-size: var(--ls-fs-sm);
+  color: var(--ls-fg-muted);
+  line-height: var(--ls-lh-snug);
+}
+.ls-mono, code {
+  font-family: var(--ls-font-mono);
+  font-size: 0.92em;
+}
+.ls-eyebrow {
+  font-size: var(--ls-fs-xs);
+  font-weight: var(--ls-fw-semibold);
+  letter-spacing: var(--ls-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ls-fg-muted);
+}
+
+/* Bilingual: let the browser auto-handle direction inside chunks.
+   We only need to provide a comfortable line height & a default. */
+.ls-bi {
+  unicode-bidi: plaintext;        /* respect intrinsic direction per run */
+  text-align: start;
+  line-height: var(--ls-lh-relaxed);
+}
+
+/* ---------- Title gradient drift -------------------------- */
+@keyframes lsTitleDrift {
+  0%   { background-position:   0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position:   0% 50%; }
+}
+
+/* ---------- Card / token entries -------------------------- */
+@keyframes lsFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes lsFadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes lsCardEnter {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes lsTokenIn {
+  from { opacity: 0; filter: blur(2px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+@keyframes lsCaretBlink {
+  0%, 50%  { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+@keyframes lsDotPulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+@keyframes lsThinkSweep {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(200%); }
+}
+
+/* ---------- Reduced motion -------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .ls-h1, .ls-display { animation: none; background-position: 0% 50%; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

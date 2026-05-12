@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 64" width="320" height="64" fill="none">
+  <defs>
+    <linearGradient id="ls-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4338ca"></stop>
+      <stop offset="50%" stop-color="#c026d3"></stop>
+      <stop offset="100%" stop-color="#f59e0b"></stop>
+    </linearGradient>
+  </defs>
+  
+  <g transform="translate(8,8)" stroke="url(#ls-grad)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="22" cy="22" r="18"></circle>
+    <line x1="35" y1="35" x2="48" y2="48"></line>
+    <path d="M16 14 L31 22 L16 30 Z" fill="url(#ls-grad)" stroke="none"></path>
+  </g>
+  
+  <g transform="translate(72,0)" fill="#0f172a" font-family="-apple-system,BlinkMacSystemFont,&#39;Segoe UI&#39;,Roboto,sans-serif" font-weight="700">
+    <text x="0" y="38" font-size="28" letter-spacing="-0.5">Lecture</text>
+    <text x="108" y="38" font-size="28" letter-spacing="-0.5" fill="url(#ls-grad)">Search</text>
+  </g>
+</svg>

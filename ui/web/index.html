@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lecture Search</title>
+  <link rel="icon" href="assets/favicon.svg" />
+  <link rel="stylesheet" href="colors_and_type.css" />
+  <style>
+    html, body { margin: 0; padding: 0; background: var(--ls-bg); }
+    body { font-family: var(--ls-font-sans); color: var(--ls-fg); }
+  </style>
+  <script src="https://unpkg.com/lucide@0.451.0/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="components/api.js"></script>
+  <script type="text/babel" src="components/primitives.jsx"></script>
+  <script type="text/babel" src="components/PipelineRow.jsx"></script>
+  <script type="text/babel" src="components/ResultCard.jsx"></script>
+  <script type="text/babel" src="components/SearchTab.jsx"></script>
+  <script type="text/babel" src="components/AskTab.jsx"></script>
+  <script type="text/babel" src="components/UploadTab.jsx"></script>
+  <script type="text/babel" src="components/VideosTab.jsx"></script>
+  <script type="text/babel" src="components/SummarizeTab.jsx"></script>
+  <script type="text/babel" src="components/StatsTab.jsx"></script>
+  <script type="text/babel" src="components/Sidebar.jsx"></script>
+  <script type="text/babel" src="components/CommandPalette.jsx"></script>
+  <script type="text/babel" src="components/App.jsx"></script>
+  <script type="text/babel" data-presets="react">
+    function whenReady(names, cb) {
+      if (names.every(n => window[n])) return cb();
+      setTimeout(() => whenReady(names, cb), 30);
+    }
+    whenReady(
+      ['App', 'SearchTab', 'AskTab', 'UploadTab', 'VideosTab', 'SummarizeTab', 'StatsTab', 'Sidebar', 'CommandPalette'],
+      () => ReactDOM.createRoot(document.getElementById('root')).render(<App />)
+    );
+  </script>
+</body>
+</html>

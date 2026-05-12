@@ -1,0 +1,32 @@
+# --- Build artifacts and caches ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage*
+
+# --- Virtual envs (don't ship local venvs into the image) ---
+.venv/
+venv/
+env/
+
+# --- Node artifacts (the ui-build stage installs fresh) ---
+ui/components/*/node_modules/
+
+# --- Heavy runtime data (mounted as volumes instead) ---
+data/
+logs/
+
+# --- IDE / git / docs ---
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# --- Local secrets ---
+.env
+.env.local

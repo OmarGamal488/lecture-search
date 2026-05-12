@@ -1,0 +1,33 @@
+services:
+  api:
+    build:
+      context: .
+      target: api
+    image: lecture-search-api
+    container_name: lecture-search-api
+    ports:
+      - "8000:8000"
+    # .env (host, gitignored) supplies LECTURE_SEARCH_LLM_API_KEY etc. at run
+    # time — the file is NOT baked into the image.
+    env_file:
+      - .env
+    environment:
+      LECTURE_SEARCH_API_HOST: 0.0.0.0
+      LECTURE_SEARCH_API_PORT: "8000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      # The React UI is static (Babel-in-browser), served by FastAPI from
+      # /app/. Mounting it lets you edit ui/web/* without rebuilding the
+      # image. In a production deploy, drop this mount and the COPY in the
+      # Dockerfile will bake the UI in.
+      - ./ui/web:/app/ui/web:ro
+    restart: unless-stopped
+    # NVIDIA GPU support: uncomment if you have a GPU and the toolkit installed.
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
