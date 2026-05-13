@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import threading
 import time
 import traceback
 
@@ -14,6 +15,16 @@ from fastapi import (
     Request,
     UploadFile,
 )
+
+# Process-wide lock: only one video may run through the LangGraph
+# pipeline at a time. Whisper's `model.transcribe()` and the bge-m3
+# embedding pass aren't thread-safe — concurrent calls share kv-cache
+# state and produce empty or corrupted output. FastAPI's BackgroundTasks
+# dispatches each upload onto its own thread, so we serialize at the
+# pipeline entry point instead. Videos queued while another is running
+# wait here; their `processing_status` stays at "queued" until they
+# acquire the lock.
+_PIPELINE_LOCK = threading.Lock()
 
 from lecture_search.api.schemas import (
     VideoInfo,
@@ -59,55 +70,65 @@ def _process_video_task(
     Each LangGraph node calls back into `on_step` as it completes so the
     polling UI can advance the 7-stage visualizer instead of jumping from
     "initializing" straight to "completed".
-    """
-    try:
-        processing_status[video_id] = {
-            "status": "processing",
-            "step": "initializing",  # frontend treats this as "stage 0 active"
-            "progress": 5,
-            "message": "Starting LangGraph pipeline...",
-        }
 
-        def on_step(node_name: str, pct: int) -> None:
+    Serialized via `_PIPELINE_LOCK`: at most one video runs through
+    Whisper + bge-m3 at any moment. Queued uploads wait on the lock and
+    remain in "queued" status (set by `upload_video`) until their turn.
+    """
+    # Acquire the global pipeline lock. While another upload is being
+    # processed, we sit here with the existing "queued" status so the
+    # UI shows the wait honestly.
+    with _PIPELINE_LOCK:
+        try:
             processing_status[video_id] = {
                 "status": "processing",
-                "step": node_name,
-                "progress": pct,
-                "message": f"{node_name} ({pct}%)",
+                "step": "initializing",  # frontend treats this as "stage 0 active"
+                "progress": 5,
+                "message": "Starting LangGraph pipeline...",
             }
 
-        start = time.time()
-        result = processor.process_video(filepath, filename, on_step=on_step)
-        elapsed = time.time() - start
+            def on_step(node_name: str, pct: int) -> None:
+                processing_status[video_id] = {
+                    "status": "processing",
+                    "step": node_name,
+                    "progress": pct,
+                    "message": f"{node_name} ({pct}%)",
+                }
 
-        if result and result.get("success"):
-            processing_status[video_id] = {
-                "status": "completed",
-                "step": "completed",
-                "progress": 100,
-                "message": "Processed successfully",
-                "num_chunks": result.get("num_chunks", 0),
-                "duration": result.get("duration", 0),
-                "processing_time": elapsed,
-            }
-        else:
-            err = result.get("error", "Unknown error") if result else "Processing failed"
+            print(f"[PIPELINE] === starting video_id={video_id} {filename!r} ===")
+            start = time.time()
+            result = processor.process_video(filepath, filename, on_step=on_step)
+            elapsed = time.time() - start
+            print(f"[PIPELINE] === finished video_id={video_id} in {elapsed:.1f}s ===")
+
+            if result and result.get("success"):
+                processing_status[video_id] = {
+                    "status": "completed",
+                    "step": "completed",
+                    "progress": 100,
+                    "message": "Processed successfully",
+                    "num_chunks": result.get("num_chunks", 0),
+                    "duration": result.get("duration", 0),
+                    "processing_time": elapsed,
+                }
+            else:
+                err = result.get("error", "Unknown error") if result else "Processing failed"
+                processing_status[video_id] = {
+                    "status": "failed",
+                    "step": "failed",
+                    "progress": 0,
+                    "message": f"Processing failed: {err}",
+                    "error": err,
+                }
+        except Exception as exc:
             processing_status[video_id] = {
                 "status": "failed",
                 "step": "failed",
                 "progress": 0,
-                "message": f"Processing failed: {err}",
-                "error": err,
+                "message": f"Processing failed: {exc}",
+                "error": str(exc),
+                "traceback": traceback.format_exc(),
             }
-    except Exception as exc:
-        processing_status[video_id] = {
-            "status": "failed",
-            "step": "failed",
-            "progress": 0,
-            "message": f"Processing failed: {exc}",
-            "error": str(exc),
-            "traceback": traceback.format_exc(),
-        }
 
 
 @router.post("/upload", response_model=VideoUploadResponse)

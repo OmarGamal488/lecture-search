@@ -277,6 +277,103 @@
   100% { transform: translateX(200%); }
 }
 
+/* ---------- Markdown-rendered Ask answer ------------------ */
+/* Applied to the final (phase=done) answer once `marked` parses it. */
+.ls-answer-md p {
+  margin: 0 0 0.85em 0;
+}
+.ls-answer-md p:last-child { margin-bottom: 0; }
+
+.ls-answer-md h1,
+.ls-answer-md h2,
+.ls-answer-md h3,
+.ls-answer-md h4 {
+  font-weight: var(--ls-fw-semibold);
+  letter-spacing: var(--ls-tracking-tight);
+  margin: 1.2em 0 0.4em 0;
+  line-height: var(--ls-lh-snug);
+}
+.ls-answer-md h1 { font-size: var(--ls-fs-xl); }
+.ls-answer-md h2 { font-size: var(--ls-fs-lg); }
+.ls-answer-md h3 { font-size: var(--ls-fs-md); }
+.ls-answer-md h4 { font-size: var(--ls-fs-base); }
+
+.ls-answer-md strong { font-weight: var(--ls-fw-bold); color: var(--ls-fg); }
+.ls-answer-md em { font-style: italic; }
+
+.ls-answer-md ul,
+.ls-answer-md ol {
+  margin: 0.3em 0 0.85em 1.4em;
+  padding: 0;
+}
+.ls-answer-md li {
+  margin: 0.25em 0;
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+.ls-answer-md li > p { margin-bottom: 0.25em; }
+
+.ls-answer-md code {
+  font-family: var(--ls-font-mono);
+  font-size: 0.9em;
+  background: var(--ls-bg-muted);
+  border: 1px solid var(--ls-divider);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+}
+.ls-answer-md pre {
+  background: var(--ls-bg-muted);
+  border: 1px solid var(--ls-divider);
+  border-radius: var(--ls-radius-md);
+  padding: 12px 14px;
+  overflow-x: auto;
+  margin: 0.6em 0 0.9em 0;
+}
+.ls-answer-md pre code {
+  border: none; background: transparent; padding: 0;
+  font-size: 0.85em; line-height: 1.55;
+}
+
+.ls-answer-md blockquote {
+  margin: 0.6em 0 0.9em 0;
+  padding: 0.3em 0.9em;
+  border-inline-start: 3px solid var(--ls-accent-soft);
+  color: var(--ls-fg-muted);
+  background: var(--ls-bg-muted);
+  border-radius: 0 var(--ls-radius-sm) var(--ls-radius-sm) 0;
+}
+
+.ls-answer-md a:not(.ls-cite) {
+  color: var(--ls-indigo);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ls-answer-md table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.6em 0 0.9em 0;
+  font-size: 0.95em;
+}
+.ls-answer-md th,
+.ls-answer-md td {
+  border: 1px solid var(--ls-divider);
+  padding: 6px 10px;
+  text-align: start;
+}
+.ls-answer-md th { background: var(--ls-bg-muted); font-weight: var(--ls-fw-semibold); }
+
+.ls-answer-md hr {
+  border: 0; border-top: 1px solid var(--ls-divider);
+  margin: 1em 0;
+}
+
+.ls-cite:hover {
+  background: var(--ls-blue) !important;
+  color: #fff !important;
+  transition: background var(--ls-dur-fast) var(--ls-ease-out), color var(--ls-dur-fast) var(--ls-ease-out);
+}
+
 /* ---------- Reduced motion -------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .ls-h1, .ls-display { animation: none; background-position: 0% 50%; }

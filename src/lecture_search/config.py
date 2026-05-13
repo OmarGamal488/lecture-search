@@ -57,8 +57,13 @@ for _dir in (DATA_DIR, VIDEOS_DIR, TEMP_DIR, LOGS_DIR, CHROMA_DIR.parent):
 SQLALCHEMY_URL: str = f"sqlite:///{SQLITE_PATH}"
 
 # ---- Models -------------------------------------------------------------
+# Default to BAAI/bge-m3 — a strong multilingual retrieval model that
+# handles Arabic and English in the same embedding space without the
+# English-bias the previous `all-mpnet-base-v2` exhibited. Outputs are
+# 1024-d (not 768-d), so existing Chroma vectors must be wiped and
+# re-embedded after switching: run `scripts/reembed.py`.
 EMBEDDING_MODEL: str = os.getenv(
-    "LECTURE_SEARCH_EMBEDDING_MODEL", "all-mpnet-base-v2"
+    "LECTURE_SEARCH_EMBEDDING_MODEL", "BAAI/bge-m3"
 )
 WHISPER_MODEL: str = os.getenv("LECTURE_SEARCH_WHISPER_MODEL", "medium")
 
@@ -72,7 +77,18 @@ LLM_MODEL: str = os.getenv(
     "LECTURE_SEARCH_LLM_MODEL", "meta-llama/Meta-Llama-3.1-8B-Instruct"
 )
 
-EMBEDDING_DIM: int = 384 if "minilm" in EMBEDDING_MODEL.lower() else 768
+def _infer_embedding_dim(model: str) -> int:
+    """Best-effort dimension lookup for the embedding model we ship with."""
+    name = model.lower()
+    if "minilm" in name:
+        return 384
+    if "bge-m3" in name or "e5-large" in name:
+        return 1024
+    # mpnet, multilingual-mpnet, bge-large-en, etc.
+    return 768
+
+
+EMBEDDING_DIM: int = _infer_embedding_dim(EMBEDDING_MODEL)
 
 
 def _device_default() -> str:

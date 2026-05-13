@@ -35,6 +35,7 @@ scripts/deploy_huggingface.py
 scripts/fetch_hf_logs.py
 scripts/generate_eval_set.py
 scripts/compile_prompts.py
+scripts/reembed.py
 Makefile.local
 
 # --- Project data (heavy / runtime-generated) ---

@@ -50,11 +50,44 @@ function ResultCard({ hit, index = 0, anchorId, badge, query = '' }) {
   );
 }
 
-// Splits `text` around case-insensitive matches of any whitespace-separated
-// token in `query` (length ≥ 2) and wraps each match in a highlighter span.
+// Highlighting is intentionally English-only. Arabic tokens are skipped
+// because (a) the bilingual corpus mixes English technical terms inside
+// Arabic prose and the user has indicated Arabic highlights aren't
+// useful, and (b) reliable Arabic stop-word filtering is corpus-specific
+// and produced false positives. English-only highlighting still
+// emphasises the technical terms that matter most in this corpus.
+const STOP_WORDS_EN = new Set([
+  'a', 'an', 'and', 'are', 'as', 'at', 'be', 'been', 'being', 'but',
+  'by', 'can', 'could', 'did', 'do', 'does', 'doing', 'done', 'for',
+  'from', 'had', 'has', 'have', 'he', 'her', 'here', 'his', 'how', 'i',
+  'if', 'in', 'into', 'is', 'it', 'its', 'me', 'my', 'no', 'not', 'of',
+  'on', 'or', 'our', 'should', 'so', 'some', 'such', 'than', 'that',
+  'the', 'their', 'them', 'then', 'there', 'these', 'they', 'this',
+  'those', 'to', 'too', 'us', 'was', 'we', 'were', 'what', 'when',
+  'where', 'which', 'who', 'whom', 'why', 'will', 'with', 'would',
+  'you', 'your',
+]);
+
+const MIN_TOKEN_LENGTH = 3;
+// Detects any character in the Arabic Unicode block (U+0600..U+06FF)
+// or the Arabic Supplement / Extended-A blocks. A token containing
+// even one Arabic glyph is treated as Arabic and skipped.
+const ARABIC_CHAR = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+
+function shouldHighlight(token) {
+  if (token.length < MIN_TOKEN_LENGTH) return false;       // too short
+  if (ARABIC_CHAR.test(token)) return false;                // Arabic — skip
+  if (STOP_WORDS_EN.has(token.toLowerCase())) return false; // English stop word
+  return true;
+}
+
+// Splits `text` around case-insensitive matches of meaningful English
+// tokens from `query` and wraps each match in a highlighter span.
+// Arabic tokens are deliberately not highlighted — only Latin-script
+// content words like "DBMS", "entity", "modeling" trigger marks.
 function highlight(text, query) {
   if (!query) return text;
-  const tokens = query.split(/\s+/).filter(t => t.length >= 2);
+  const tokens = query.split(/\s+/).filter(shouldHighlight);
   if (tokens.length === 0) return text;
   const escaped = tokens.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   const re = new RegExp(`(${escaped.join('|')})`, 'gi');

@@ -115,7 +115,8 @@ function AskTab() {
         }}>
           <Eyebrow>Answer</Eyebrow>
           {phase === 'thinking' && <ThinkingBar />}
-          {phase !== 'thinking' && <Answer tokens={tokens} showCaret={phase === 'streaming'} />}
+          {phase === 'streaming' && <Answer tokens={tokens} showCaret={true} />}
+          {phase === 'done' && <MarkdownAnswer text={fullTextRef.current || tokens.join('')} />}
           {phase === 'done' && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8, marginTop: 4,
@@ -177,6 +178,84 @@ function ThinkingBar() {
       </div>
     </div>
   );
+}
+
+// Final rendered answer once the stream completes. Parses markdown via
+// `marked` (loaded from CDN in index.html) and turns `[N]` citation
+// markers into clickable chips that anchor to the source cards below.
+function MarkdownAnswer({ text }) {
+  const ref = React.useRef(null);
+
+  // Re-bind click handlers / smooth-scroll the citation chips after every
+  // re-render. We rely on plain anchors so reduced-motion users get
+  // browser-native instant jump.
+  React.useEffect(() => {
+    if (!ref.current) return;
+    ref.current.querySelectorAll('a.ls-cite').forEach((el) => {
+      el.onclick = (e) => {
+        const id = el.getAttribute('href')?.slice(1);
+        const target = id && document.getElementById(id);
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+    });
+  }, [text]);
+
+  const html = React.useMemo(() => renderAnswerMarkdown(text), [text]);
+
+  return (
+    <div ref={ref}
+      className="ls-answer-md ls-bi"
+      style={{ fontSize: 16, lineHeight: 1.8, color: 'var(--ls-fg)', unicodeBidi: 'plaintext', textAlign: 'start' }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+
+// 1. Replace `[N]` with a sentinel so marked doesn't touch it.
+// 2. Run marked on the rest (bold/italic/code/lists/headings/blockquotes).
+// 3. Replace the sentinel with the citation-chip <a> markup that anchors
+//    to `#source-N` and matches the same styling as the streaming chips.
+function renderAnswerMarkdown(text) {
+  if (!text) return '';
+  const safe = String(text);
+  const sentinel = 'CITE';
+  const citations = [];
+  const withSentinels = safe.replace(/\[(\d+)\]/g, (_m, n) => {
+    citations.push(Number(n));
+    return `${sentinel}${citations.length - 1}${sentinel}`;
+  });
+  let html;
+  try {
+    if (typeof window.marked === 'undefined') {
+      // Fallback: just paragraph-break the raw text if marked failed to load.
+      html = safe
+        .split(/\n{2,}/)
+        .map((p) => `<p>${p.replace(/\n/g, '<br/>')}</p>`)
+        .join('');
+    } else {
+      html = window.marked.parse(withSentinels, { gfm: true, breaks: true });
+    }
+  } catch {
+    html = safe;
+  }
+  // Reinsert citation chips.
+  html = html.replace(
+    new RegExp(`${sentinel}(\\d+)${sentinel}`, 'g'),
+    (_m, idx) => {
+      const n = citations[Number(idx)];
+      return (
+        `<a class="ls-cite" href="#source-${n}" ` +
+        `style="display:inline-flex;align-items:center;padding:1px 7px;margin:0 2px;` +
+        `font-family:var(--ls-font-mono);font-size:11px;font-weight:700;` +
+        `color:var(--ls-blue);background:var(--ls-accent-soft);` +
+        `border-radius:6px;text-decoration:none;vertical-align:baseline;">` +
+        `${n}</a>`
+      );
+    }
+  );
+  return html;
 }
 
 function Answer({ tokens, showCaret }) {

@@ -5,7 +5,7 @@ function SearchTab() {
   const [videoId, setVideoId] = useState('all');
   const [topK, setTopK] = useState(5);
   const [mmr, setMmr] = useState(true);
-  const [threshold, setThreshold] = useState(0.0);
+  const [threshold, setThreshold] = useState(0.30);
   const [hits, setHits] = useState([]);
   const [videos, setVideos] = useState([]);
   const [recents, setRecents] = useState([]);
